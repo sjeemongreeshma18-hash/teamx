@@ -2,27 +2,31 @@
   <img src="./img.png" alt="Project Banner" width="100%">
 </p>
 
-# [Project Name] 🎯
+# RideSync 🎯
+
+**Front-end demo:** open `frontend/index.html` in a browser to try the login and search screens.
+
+
 
 ## Basic Details
 
-### Team Name: [Name]
+### Team Name: techX
 
 ### Team Members
-- Member 1: [Name] - [College]
-- Member 2: [Name] - [College]
+- Member 1: [Gania Gibu] - [TocH ]
+- Member 2: [Greeshma s Jeemon] - [TocH ]
 
 ### Hosted Project Link
 [mention your project hosted link here]
 
 ### Project Description
-[2-3 lines about what your project does]
+Web app for quick bus searches with separate passenger and conductor workflows.
 
 ### The Problem statement
-[What problem are you solving?]
+Finding appropriate buses quickly can be tedious; the app streamlines route & service filtering.
 
 ### The Solution
-[How are you solving it?]
+A simple login with roles, autocomplete stop selection and filtered results for passengers, plus a code lookup for conductors.
 
 ---
 

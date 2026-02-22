@@ -1,0 +1,23 @@
+{
+  "name": "teamx",
+  "version": "1.0.0",
+  "description": "fproj",
+  "homepage": "https://github.com/sjeemongreeshma18-hash/teamX#readme",
+  "bugs": {
+    "url": "https://github.com/sjeemongreeshma18-hash/teamX/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sjeemongreeshma18-hash/teamX.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}

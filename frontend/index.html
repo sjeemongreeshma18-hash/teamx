@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RideSync</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="screen active">
+        <div class="disclaimer-banner">
+            <div class="disclaimer-text">DISCLAIMER: THE INFORMATION PROVIDED IS BASED ON THE TIME SHEET PROVIDED FROM RTO OFFICE.</div>
+        </div>
+        <div class="login-title">RideSync</div>
+        <div class="help-bubble">HELP</div>
+        <div class="login-container">
+            <img src="logo.png" alt="RideSync Logo" class="login-logo">
+            <p>Choose your role</p>
+            <div class="button-group">
+                <button class="role-btn" onclick="selectRole('conductor')">
+                    <span class="icon">👨‍✈️</span>
+                    <span>Conductor</span>
+                </button>
+                <button class="role-btn" onclick="selectRole('passenger')">
+                    <span class="icon">👤</span>
+                    <span>Passenger</span>
+                </button>
+            </div>
+        </div>
+        <p class="login-quote">"The right buses is just a search away"</p>
+    </div>
+
+    <!-- Passenger Search Screen -->
+    <div id="passengerScreen" class="screen">
+        <div class="navbar">
+            <h1>Passenger Search</h1>
+            <button class="back-btn" onclick="logout()">Back</button>
+        </div>
+        
+        <div class="search-container">
+            <div class="search-form">
+                <!-- From Field -->
+                <div class="input-group">
+                    <label for="fromInput">From</label>
+                    <div class="autocomplete-wrapper">
+                        <input 
+                            type="text" 
+                            id="fromInput" 
+                            placeholder="Enter bus stop"
+                            onInput="handleFromInput(this.value)"
+                        >
+                        <ul id="fromSuggestions" class="suggestions-list"></ul>
+                    </div>
+                </div>
+
+                <!-- To Field -->
+                <div class="input-group">
+                    <label for="toInput">To</label>
+                    <div class="autocomplete-wrapper">
+                        <input 
+                            type="text" 
+                            id="toInput" 
+                            placeholder="Enter bus stop"
+                            onInput="handleToInput(this.value)"
+                        >
+                        <ul id="toSuggestions" class="suggestions-list"></ul>
+                    </div>
+                </div>
+
+                <!-- Time Range Field -->
+                <div class="input-group">
+                    <label for="timeInput">Time Range</label>
+                    <div class="time-inputs">
+                        <input 
+                            type="time" 
+                            id="timeFrom" 
+                            placeholder="Start time"
+                        >
+                        <span class="time-separator">-</span>
+                        <input 
+                            type="time" 
+                            id="timeTo" 
+                            placeholder="End time"
+                        >
+                    </div>
+                </div>
+
+                <!-- Bus Service Dropdown -->
+                <div class="input-group">
+                    <label for="busServiceSelect">Bus Service</label>
+                    <select id="busServiceSelect">
+                        <option value="">Select bus service</option>
+                        <option value="local">Local Bus</option>
+                        <option value="limited">Limited Stop Bus</option>
+                        <option value="all">All Buses</option>
+                    </select>
+                </div>
+
+                <!-- Search Button -->
+                <button class="search-btn" onclick="performSearch()">Search</button>
+            </div>
+        </div>
+
+        <!-- Bus Results -->
+        <div id="busResults" class="bus-results-container" style="display: none;">
+            <h2>Available Buses</h2>
+            <div id="busList" class="bus-list"></div>
+        </div>
+
+        <div id="noResults" class="no-results" style="display: none;">
+            <p>No buses found. Please try different filters.</p>
+        </div>
+    </div>
+
+    <!-- Conductor Screen -->
+    <div id="conductorScreen" class="screen">
+        <div class="navbar">
+            <h1>Conductor Dashboard</h1>
+            <button class="back-btn" onclick="logout()">Back</button>
+        </div>
+        <div class="conductor-container">
+            <div class="input-group">
+                <label for="busCodeInput">Unique Bus Code</label>
+                <input id="busCodeInput" type="password" placeholder="Enter code" />
+                <button class="search-btn" onclick="lookupBusCode()">Submit</button>
+            </div>
+            <div class="input-group conductor-message-group" id="messageGroup" style="display: none;">
+                <label for="conductorMessageInput">Message</label>
+                <textarea id="conductorMessageInput" placeholder="Enter your message" rows="5"></textarea>
+                <button class="search-btn" onclick="submitConductorMessage()">Send Message</button>
+            </div>
+            <div id="messageStatus" class="message-status" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
