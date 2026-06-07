@@ -112,11 +112,15 @@ If you used AI tools during development, document them here for transparency:
 
 **Tool Used:** GitHub Copilot, v0.dev, Cursor, Claude
 
-**Purpose:** [What you used it for]
-- Example: "Generated boilerplate React components"
-- Example: "Debugging assistance for async functions"
-- Example: "Code review and optimization suggestions"
-
+**Purpose:** 
+- To Simplify Private Bus Travel:
+Makes it easier for passengers to find suitable buses without relying on multiple sources.
+- To Provide Reliable Travel Information:
+Gives passengers access to accurate bus schedules, fares, and availability details.
+- To Improve Communication:
+Bridges the communication gap between passengers and bus operators through real-time updates.
+-To Enhance Travel Planning:
+Helps users make better travel decisions and avoid uncertainty caused by delays or service disruptions.
 **Key Prompts Used:**
 - "Create a REST API endpoint for user authentication"
 - "Debug this async function that's causing race conditions"
