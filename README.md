@@ -35,7 +35,6 @@ A simple login with roles, autocomplete stop selection and filtered results for 
 ### Technologies/Components Used
 
 **For Software:**
-- Languages used:html ,css
 - Frameworks used: React
 - Tools used: VS Code, Git
 
@@ -66,16 +65,6 @@ Passengers receive relevant alerts and updates based on their selected route and
 ```bash
 [Run commands - e.g., npm start, python app.py]
 ```
-
-### For Hardware:
-
-#### Components Required
-[List all components needed with specifications]
-
-#### Circuit Setup
-[Explain how to set up the circuit]
-
----
 
 ## Project Documentation
 
