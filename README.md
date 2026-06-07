@@ -81,20 +81,6 @@ Passengers receive relevant alerts and updates based on their selected route and
 ![Screenshot3](Add screenshot 3 here with proper name)
 *Add caption explaining what this shows*
 
-#### Diagrams
-
-**System Architecture:**
-
-![Architecture Diagram](docs/architecture.png)
-*Explain your system architecture - components, data flow, tech stack interaction*
-
-**Application Workflow:**
-
-![Workflow](docs/workflow.png)
-*Add caption explaining your workflow 
-
-
-
 
 ## Project Demo
 
@@ -120,7 +106,8 @@ Gives passengers access to accurate bus schedules, fares, and availability detai
 - To Improve Communication:
 Bridges the communication gap between passengers and bus operators through real-time updates.
 - To Enhance Travel Planning:
-Helps users make better travel decisions and avoid uncertainty caused by delays or service disruptions.
+Helps users make better travel decisions and avoid uncertainty caused by delays or service disruptions.       
+
 **Key Prompts Used:**
 - "Create a REST API endpoint for user authentication"
 - "Debug this async function that's causing race conditions"
