@@ -96,12 +96,6 @@ Passengers receive relevant alerts and updates based on their selected route and
 
 
 
-
-```
-
----
-
-
 ## Project Demo
 
 ### Video
