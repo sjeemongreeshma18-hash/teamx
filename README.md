@@ -119,7 +119,7 @@ Makes it easier for passengers to find suitable buses without relying on multipl
 Gives passengers access to accurate bus schedules, fares, and availability details.
 - To Improve Communication:
 Bridges the communication gap between passengers and bus operators through real-time updates.
--To Enhance Travel Planning:
+- To Enhance Travel Planning:
 Helps users make better travel decisions and avoid uncertainty caused by delays or service disruptions.
 **Key Prompts Used:**
 - "Create a REST API endpoint for user authentication"
