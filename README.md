@@ -17,7 +17,7 @@
 - Member 2: [Greeshma s Jeemon] - [TocH ]
 
 ### Hosted Project Link
-[mention your project hosted link here]
+https://teamx-ridesync.vercel.app/
 
 ### Project Description
 Web app for quick bus searches with separate passenger and conductor workflows.
