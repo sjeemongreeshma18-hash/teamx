@@ -35,17 +35,9 @@ A simple login with roles, autocomplete stop selection and filtered results for 
 ### Technologies/Components Used
 
 **For Software:**
-- Languages used: [e.g., JavaScript, Python, Java]
-- Frameworks used: [e.g., React, Django, Spring Boot]
-- Libraries used: [e.g., axios, pandas, JUnit]
-- Tools used: [e.g., VS Code, Git, Docker]
-
-**For Hardware:**
-- Main components: [List main components]
-- Specifications: [Technical specifications]
-- Tools required: [List tools needed]
-
----
+- Languages used:html ,css
+- Frameworks used: React
+- Tools used: VS Code, Git
 
 ## Features
 
