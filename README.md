@@ -42,10 +42,14 @@ A simple login with roles, autocomplete stop selection and filtered results for 
 ## Features
 
 List the key features of your project:
-- Feature 1: [Description]
-- Feature 2: [Description]
-- Feature 3: [Description]
-- Feature 4: [Description]
+- Feature 1: Smart Bus Search
+Find private buses based on route, departure time, and service type (Local, Limited Stop, etc.).
+- Feature 2: Bus Information & Availability
+View fare details, seat availability, and booking information before choosing a bus.
+- Feature 3: Real-Time Service Updates
+Conductors can provide instant updates about delays, breakdowns, cancellations, or route changes using a unique bus code
+- Feature 4: Personalized Passenger Notifications
+Passengers receive relevant alerts and updates based on their selected route and travel time.
 
 ---
 
