@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conductor Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Conductor Name Entry Screen -->
+    <div id="conductorLoginScreen" class="screen active">
+        <div class="navbar">
+            <h1>Conductor Login</h1>
+            <button class="back-btn" onclick="window.location.href='index.html'">Back</button>
+        </div>
+        <div class="conductor-container">
+            <div class="conductor-grid">
+                <div class="input-group">
+                    <label for="conductorNameInput">Conductor Name</label>
+                    <input id="conductorNameInput" type="text" placeholder="Enter your name" />
+                    <button class="search-btn" onclick="submitConductorName()">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conductor Bus Code Screen -->
+    <div id="conductorScreen" class="screen">
+        <div class="navbar">
+            <h1>Conductor Dashboard</h1>
+            <button class="back-btn" onclick="window.location.href='index.html'">Back</button>
+        </div>
+        <div class="conductor-container">
+            <div class="greeting">
+                <h2>Hello, <span id="displayConductorName"></span></h2>
+            </div>
+            <div class="conductor-grid">
+                <div class="input-group">
+                    <label for="busCodeInput">Unique Bus Code</label>
+                    <input id="busCodeInput" type="password" placeholder="Enter code" />
+                    <button class="search-btn" onclick="lookupBusCode()">Submit</button>
+                </div>
+                <div class="conductor-info">
+                    <label>Bus Name</label>
+                    <div id="conductorNameDisplay" class="conductor-name-value">Enter code to see name</div>
+                </div>
+            </div>
+            <div class="input-group conductor-message-group" id="messageGroup" style="display: none;">
+                <label for="conductorMessageInput">Message</label>
+                <textarea id="conductorMessageInput" placeholder="Enter your message" rows="5"></textarea>
+                <button class="search-btn" onclick="submitConductorMessage()">Send Message</button>
+            </div>
+            <div id="messageStatus" class="message-status" style="display: none;"></div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

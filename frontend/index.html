@@ -18,7 +18,7 @@
             <img src="logo.png" alt="RideSync Logo" class="login-logo">
             <p>Choose your role</p>
             <div class="button-group">
-                <button class="role-btn" onclick="selectRole('conductor')">
+                <button class="role-btn" onclick="openConductorDashboard()">
                     <span class="icon">👨‍✈️</span>
                     <span>Conductor</span>
                 </button>
@@ -38,99 +38,95 @@
             <button class="back-btn" onclick="logout()">Back</button>
         </div>
         
+        
         <div class="search-container">
-            <div class="search-form">
-                <!-- From Field -->
-                <div class="input-group">
-                    <label for="fromInput">From</label>
-                    <div class="autocomplete-wrapper">
-                        <input 
-                            type="text" 
-                            id="fromInput" 
-                            placeholder="Enter bus stop"
-                            onInput="handleFromInput(this.value)"
-                        >
-                        <ul id="fromSuggestions" class="suggestions-list"></ul>
+            <form class="search-form" id="searchForm" onsubmit="return handleSearchSubmit(event)">
+                <div class="route-row">
+                    <div class="input-group">
+                        <label for="fromInput">From</label>
+                        <div class="autocomplete-wrapper">
+                            <input
+                                type="text"
+                                id="fromInput"
+                                placeholder="Start stop"
+                                autocomplete="off"
+                                aria-autocomplete="list"
+                            >
+                            <ul id="fromSuggestions" class="suggestions-list"></ul>
+                        </div>
+                    </div>
+
+                    <button type="button" class="swap-btn" id="swapStopsBtn" title="Swap stops" aria-label="Swap from and to">
+                        ⇄
+                    </button>
+
+                    <div class="input-group">
+                        <label for="toInput">To</label>
+                        <div class="autocomplete-wrapper">
+                            <input
+                                type="text"
+                                id="toInput"
+                                placeholder="Destination stop"
+                                autocomplete="off"
+                                aria-autocomplete="list"
+                            >
+                            <ul id="toSuggestions" class="suggestions-list"></ul>
+                        </div>
                     </div>
                 </div>
 
-                <!-- To Field -->
-                <div class="input-group">
-                    <label for="toInput">To</label>
-                    <div class="autocomplete-wrapper">
-                        <input 
-                            type="text" 
-                            id="toInput" 
-                            placeholder="Enter bus stop"
-                            onInput="handleToInput(this.value)"
-                        >
-                        <ul id="toSuggestions" class="suggestions-list"></ul>
+                <div class="input-group time-group">
+                    <label>Departure window <span class="optional-hint">(optional)</span></label>
+                    <div class="time-presets" id="timePresets">
+                        <button type="button" class="preset-chip active" data-preset="all">All day</button>
+                        <button type="button" class="preset-chip" data-preset="now">From now</button>
+                        <button type="button" class="preset-chip" data-preset="morning">Morning</button>
+                        <button type="button" class="preset-chip" data-preset="afternoon">Afternoon</button>
+                        <button type="button" class="preset-chip" data-preset="evening">Evening</button>
                     </div>
-                </div>
-
-                <!-- Time Range Field -->
-                <div class="input-group">
-                    <label for="timeInput">Time Range</label>
                     <div class="time-inputs">
-                        <input 
-                            type="time" 
-                            id="timeFrom" 
-                            placeholder="Start time"
-                        >
-                        <span class="time-separator">-</span>
-                        <input 
-                            type="time" 
-                            id="timeTo" 
-                            placeholder="End time"
-                        >
+                        <input type="time" id="timeFrom" aria-label="Earliest departure">
+                        <span class="time-separator">–</span>
+                        <input type="time" id="timeTo" aria-label="Latest departure">
                     </div>
                 </div>
 
-                <!-- Bus Service Dropdown -->
                 <div class="input-group">
                     <label for="busServiceSelect">Bus Service</label>
                     <select id="busServiceSelect">
-                        <option value="">Select bus service</option>
+                        <option value="all">All Buses</option>
                         <option value="local">Local Bus</option>
                         <option value="limited">Limited Stop Bus</option>
-                        <option value="all">All Buses</option>
                     </select>
                 </div>
 
-                <!-- Search Button -->
-                <button class="search-btn" onclick="performSearch()">Search</button>
-            </div>
+                <button type="submit" class="search-btn">Search</button>
+            </form>
+            <p class="search-hint">Stops along a route count. Try Petta → Kadavanthra without setting a time.</p>
+            <div id="searchError" class="search-error" hidden></div>
         </div>
 
-        <!-- Bus Results -->
         <div id="busResults" class="bus-results-container" style="display: none;">
-            <h2>Available Buses</h2>
+            <div class="results-header">
+                <div>
+                    <h2>Available Buses</h2>
+                    <p id="resultsSummary" class="results-summary"></p>
+                </div>
+                <div class="input-group sort-group">
+                    <label for="sortSelect">Sort by</label>
+                    <select id="sortSelect">
+                        <option value="departure">Departure (earliest)</option>
+                        <option value="duration">Fastest</option>
+                        <option value="price">Lowest fare</option>
+                        <option value="seats">Most seats</option>
+                    </select>
+                </div>
+            </div>
             <div id="busList" class="bus-list"></div>
         </div>
 
         <div id="noResults" class="no-results" style="display: none;">
-            <p>No buses found. Please try different filters.</p>
-        </div>
-    </div>
-
-    <!-- Conductor Screen -->
-    <div id="conductorScreen" class="screen">
-        <div class="navbar">
-            <h1>Conductor Dashboard</h1>
-            <button class="back-btn" onclick="logout()">Back</button>
-        </div>
-        <div class="conductor-container">
-            <div class="input-group">
-                <label for="busCodeInput">Unique Bus Code</label>
-                <input id="busCodeInput" type="password" placeholder="Enter code" />
-                <button class="search-btn" onclick="lookupBusCode()">Submit</button>
-            </div>
-            <div class="input-group conductor-message-group" id="messageGroup" style="display: none;">
-                <label for="conductorMessageInput">Message</label>
-                <textarea id="conductorMessageInput" placeholder="Enter your message" rows="5"></textarea>
-                <button class="search-btn" onclick="submitConductorMessage()">Send Message</button>
-            </div>
-            <div id="messageStatus" class="message-status" style="display: none;"></div>
+            <p id="noResultsText">No buses found for this route. Try a wider time window or All Buses.</p>
         </div>
     </div>
 
