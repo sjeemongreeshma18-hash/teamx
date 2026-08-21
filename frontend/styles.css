@@ -634,6 +634,54 @@ body {
     padding: 0;
 }
 
+.transfer-card {
+    align-items: stretch;
+}
+
+.transfer-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+}
+
+.transfer-badge {
+    display: inline-flex;
+    align-self: flex-start;
+    background: #eef2ff;
+    color: #4338ca;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 10px;
+    border-radius: 999px;
+}
+
+.transfer-legs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.transfer-leg {
+    background: #f8f9ff;
+    border: 1px solid #e4e7ff;
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.transfer-totals {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.transfer-actions {
+    min-width: 200px;
+}
+
+.book-both-btn {
+    background: linear-gradient(135deg, #18794e 0%, #0f6b3e 100%);
+}
+
 /* No Results */
 .no-results {
     padding: 40px;
@@ -856,6 +904,11 @@ body {
     .bus-card-main {
         grid-template-columns: 1fr;
         gap: 10px;
+    }
+
+    .transfer-legs,
+    .transfer-totals {
+        grid-template-columns: 1fr;
     }
 
     .bus-card .book-btn {

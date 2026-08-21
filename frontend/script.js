@@ -9,6 +9,10 @@ const westEast = ['petta', 'thykoodam', 'vyttilla hub', 'elamkulam', 'kadavanthr
 const eastWest = [...westEast].reverse();
 const southLine = ['kadavanthra', 'thirupunithura', 'vadakkekotta'];
 const northLine = ['puthotta', 'nadakkav', 'puthiyakav', 'vyttilla hub'];
+const northLineReturn = [...northLine].reverse();
+const TRANSFER_HUBS = ['vyttilla hub', 'kadavanthra'];
+const TRANSFER_BUFFER_MINUTES = 8;
+const MAX_TRANSFER_RESULTS = 8;
 
 // Sample Bus Data — each bus lists stops in travel order
 const busesDatabase = [
@@ -239,6 +243,30 @@ const busesDatabase = [
         type: 'limited',
         seats: 16,
         price: 30
+    },
+    {
+        id: 20,
+        name: 'North Return',
+        from: 'vyttilla hub',
+        to: 'puthotta',
+        route: northLineReturn,
+        departure: '08:50',
+        arrival: '09:35',
+        type: 'local',
+        seats: 34,
+        price: 22
+    },
+    {
+        id: 21,
+        name: 'Harbour Link',
+        from: 'vyttilla hub',
+        to: 'puthotta',
+        route: northLineReturn,
+        departure: '12:10',
+        arrival: '12:55',
+        type: 'limited',
+        seats: 19,
+        price: 30
     }
 ];
 
@@ -392,6 +420,68 @@ function tripForSearch(bus, from, to) {
         seats,
         fare: bus.price
     };
+}
+
+function tripMatchesFilters(trip, busService, timeFrom, timeTo) {
+    const matchesService = busService === 'all' || trip.bus.type === busService;
+    if (!matchesService) return false;
+    if (!timeFrom && !timeTo) return true;
+    const board = timeToMinutes(trip.boardTime);
+    return board >= timeToMinutes(timeFrom) && board <= timeToMinutes(timeTo);
+}
+
+function buildTransferItinerary(first, second, hub, from, to) {
+    const wait = timeToMinutes(second.boardTime) - timeToMinutes(first.alightTime);
+    return {
+        kind: 'transfer',
+        hub,
+        first,
+        second,
+        wait,
+        from,
+        to,
+        boardTime: first.boardTime,
+        alightTime: second.alightTime,
+        duration: timeToMinutes(second.alightTime) - timeToMinutes(first.boardTime),
+        fare: first.fare + second.fare,
+        seats: Math.min(first.seats, second.seats)
+    };
+}
+
+function findTransferItineraries(from, to, busService, timeFrom, timeTo) {
+    const itineraries = [];
+    const seen = new Set();
+
+    TRANSFER_HUBS.forEach(hub => {
+        if (hub === from || hub === to) return;
+
+        const firstLegs = busesDatabase
+            .map(bus => tripForSearch(bus, from, hub))
+            .filter(Boolean)
+            .filter(trip => tripMatchesFilters(trip, busService, timeFrom, timeTo));
+
+        const secondLegs = busesDatabase
+            .map(bus => tripForSearch(bus, hub, to))
+            .filter(Boolean)
+            .filter(trip => busService === 'all' || trip.bus.type === busService);
+
+        firstLegs.forEach(first => {
+            secondLegs.forEach(second => {
+                if (first.bus.id === second.bus.id) return;
+                const wait = timeToMinutes(second.boardTime) - timeToMinutes(first.alightTime);
+                if (wait < TRANSFER_BUFFER_MINUTES) return;
+
+                const key = `${first.bus.id}-${second.bus.id}-${hub}`;
+                if (seen.has(key)) return;
+                seen.add(key);
+
+                itineraries.push(buildTransferItinerary(first, second, hub, from, to));
+            });
+        });
+    });
+
+    itineraries.sort((a, b) => a.wait - b.wait || a.duration - b.duration || timeToMinutes(a.boardTime) - timeToMinutes(b.boardTime));
+    return itineraries.slice(0, MAX_TRANSFER_RESULTS);
 }
 
 function openConductorDashboard() {
@@ -655,15 +745,12 @@ function performSearch() {
     const trips = busesDatabase
         .map(bus => tripForSearch(bus, from, to))
         .filter(Boolean)
-        .filter(trip => {
-            const matchesService = busService === 'all' || trip.bus.type === busService;
-            if (!matchesService) return false;
-            if (!timeFrom && !timeTo) return true;
-            const board = timeToMinutes(trip.boardTime);
-            return board >= timeToMinutes(timeFrom) && board <= timeToMinutes(timeTo);
-        });
+        .filter(trip => tripMatchesFilters(trip, busService, timeFrom, timeTo))
+        .map(trip => ({ ...trip, kind: 'through' }));
 
-    lastSearch = { from, to, trips, busService, timeFrom, timeTo };
+    const transfers = findTransferItineraries(from, to, busService, timeFrom, timeTo);
+
+    lastSearch = { from, to, trips, transfers, busService, timeFrom, timeTo };
     renderSearchResults();
 }
 
@@ -688,9 +775,12 @@ function renderSearchResults() {
     const noResultsText = document.getElementById('noResultsText');
     const sortSelect = document.getElementById('sortSelect');
     const sortBy = sortSelect ? sortSelect.value : 'departure';
-    const trips = sortTrips(lastSearch.trips, sortBy);
+    const throughCount = lastSearch.trips.length;
+    const transfers = lastSearch.transfers || [];
+    const transferCount = transfers.length;
+    const items = sortTrips(lastSearch.trips.concat(transfers), sortBy);
 
-    if (trips.length === 0) {
+    if (items.length === 0) {
         busResults.style.display = 'none';
         noResults.style.display = 'block';
         if (noResultsText) {
@@ -700,7 +790,9 @@ function renderSearchResults() {
     }
 
     busList.innerHTML = '';
-    trips.forEach(trip => busList.appendChild(createBusCard(trip)));
+    items.forEach(item => {
+        busList.appendChild(item.kind === 'transfer' ? createTransferCard(item) : createBusCard(item));
+    });
     busResults.style.display = 'block';
     noResults.style.display = 'none';
 
@@ -708,7 +800,11 @@ function renderSearchResults() {
         const timeLabel = lastSearch.timeFrom && lastSearch.timeTo
             ? ` departing ${lastSearch.timeFrom}–${lastSearch.timeTo}`
             : '';
-        summary.textContent = `${trips.length} bus${trips.length === 1 ? '' : 'es'} from ${formatStopName(lastSearch.from)} to ${formatStopName(lastSearch.to)}${timeLabel}.`;
+        const throughLabel = `${throughCount} bus${throughCount === 1 ? '' : 'es'}`;
+        const transferLabel = transferCount
+            ? ` and ${transferCount} transfer${transferCount === 1 ? '' : 's'}`
+            : '';
+        summary.textContent = `${throughLabel}${transferLabel} from ${formatStopName(lastSearch.from)} to ${formatStopName(lastSearch.to)}${timeLabel}.`;
     }
 }
 
@@ -768,32 +864,154 @@ function createBusCard(trip) {
     return card;
 }
 
-function bookBus(busId) {
+function seatMeta(seats) {
+    const seatsClass = seats === 0 ? 'seats-none' : seats <= 8 ? 'seats-low' : 'seats-ok';
+    const seatsLabel = seats === 0 ? 'Sold out' : seats <= 8 ? `${seats} seats left` : `${seats} seats`;
+    return { seatsClass, seatsLabel };
+}
+
+function createTransferCard(itinerary) {
+    const { first, second, hub } = itinerary;
+    const card = document.createElement('div');
+    card.className = 'bus-card transfer-card';
+    const { seatsClass, seatsLabel } = seatMeta(itinerary.seats);
+    const firstSeats = seatMeta(first.seats);
+    const secondSeats = seatMeta(second.seats);
+    const firstMessage = conductorMessages[first.bus.name];
+    const secondMessage = conductorMessages[second.bus.name];
+    const bothDisabled = first.seats === 0 || second.seats === 0 ? 'disabled' : '';
+
+    card.innerHTML = `
+        <div class="transfer-body">
+            <div class="transfer-badge">1 transfer at ${formatStopName(hub)} · ${itinerary.wait} min wait</div>
+            <div class="transfer-legs">
+                <div class="transfer-leg">
+                    <div class="bus-info-title">LEG 1</div>
+                    <div class="bus-info-value">${escapeHtml(first.bus.name)}</div>
+                    <span class="service-badge ${first.bus.type}">${first.bus.type === 'local' ? 'Local' : 'Limited stop'}</span>
+                    <div class="bus-info-sub">${first.boardTime} ${formatStopName(first.from)} → ${first.alightTime} ${formatStopName(hub)}</div>
+                    <div class="bus-info-sub ${firstSeats.seatsClass}">${firstSeats.seatsLabel}</div>
+                </div>
+                <div class="transfer-leg">
+                    <div class="bus-info-title">LEG 2</div>
+                    <div class="bus-info-value">${escapeHtml(second.bus.name)}</div>
+                    <span class="service-badge ${second.bus.type}">${second.bus.type === 'local' ? 'Local' : 'Limited stop'}</span>
+                    <div class="bus-info-sub">${second.boardTime} ${formatStopName(hub)} → ${second.alightTime} ${formatStopName(second.to)}</div>
+                    <div class="bus-info-sub ${secondSeats.seatsClass}">${secondSeats.seatsLabel}</div>
+                </div>
+            </div>
+            <div class="bus-card-main transfer-totals">
+                <div class="bus-info">
+                    <div class="bus-info-title">BOARD</div>
+                    <div class="bus-info-value">${itinerary.boardTime}</div>
+                    <div class="bus-info-sub">${formatStopName(itinerary.from)}</div>
+                </div>
+                <div class="bus-info">
+                    <div class="bus-info-title">TOTAL</div>
+                    <div class="bus-info-value">${formatDuration(itinerary.duration)}</div>
+                    <div class="bus-info-sub">${seatsLabel}</div>
+                </div>
+                <div class="bus-info">
+                    <div class="bus-info-title">ALIGHT</div>
+                    <div class="bus-info-value">${itinerary.alightTime}</div>
+                    <div class="bus-info-sub">${formatStopName(itinerary.to)}</div>
+                </div>
+                <div class="bus-info">
+                    <div class="bus-info-title">FARE</div>
+                    <div class="bus-info-value">₹${itinerary.fare}</div>
+                    <div class="bus-info-sub ${seatsClass}">Combined</div>
+                </div>
+            </div>
+            ${firstMessage || secondMessage ? `
+            <div class="bus-action-message">
+                <div class="bus-info-title">CONDUCTOR MESSAGES</div>
+                ${firstMessage ? `<div class="bus-info-value">${escapeHtml(first.bus.name)}: ${escapeHtml(firstMessage)}</div>` : ''}
+                ${secondMessage ? `<div class="bus-info-value">${escapeHtml(second.bus.name)}: ${escapeHtml(secondMessage)}</div>` : ''}
+            </div>
+            ` : ''}
+        </div>
+        <div class="bus-action transfer-actions">
+            <button class="book-btn" ${first.seats === 0 ? 'disabled' : ''} onclick="bookBus(${first.bus.id})">
+                ${first.seats === 0 ? 'Leg 1 unavailable' : 'Book ' + escapeHtml(first.bus.name)}
+            </button>
+            <button class="book-btn" ${second.seats === 0 ? 'disabled' : ''} onclick="bookBus(${second.bus.id})">
+                ${second.seats === 0 ? 'Leg 2 unavailable' : 'Book ' + escapeHtml(second.bus.name)}
+            </button>
+            <button class="book-btn book-both-btn" ${bothDisabled} onclick="bookTransfer(${first.bus.id}, ${second.bus.id})">
+                ${bothDisabled ? 'Unavailable' : 'Book both'}
+            </button>
+        </div>
+    `;
+
+    return card;
+}
+
+function refreshSearchSeats() {
+    if (!lastSearch) return;
+
+    lastSearch.trips = lastSearch.trips.map(trip => ({
+        ...trip,
+        seats: getAvailableSeats(trip.bus)
+    }));
+
+    lastSearch.transfers = (lastSearch.transfers || []).map(itinerary => {
+        const first = { ...itinerary.first, seats: getAvailableSeats(itinerary.first.bus) };
+        const second = { ...itinerary.second, seats: getAvailableSeats(itinerary.second.bus) };
+        return buildTransferItinerary(first, second, itinerary.hub, itinerary.from, itinerary.to);
+    });
+}
+
+function showBookingToast(message) {
+    const notice = document.createElement('div');
+    notice.className = 'booking-toast';
+    notice.textContent = message;
+    document.body.appendChild(notice);
+    setTimeout(() => notice.remove(), 2800);
+}
+
+function reserveSeat(busId) {
     const bus = busesDatabase.find(b => b.id === busId);
-    if (!bus) return;
+    if (!bus) return null;
 
     const seats = getAvailableSeats(bus);
     if (seats <= 0) {
         showSearchError(`${bus.name} is sold out.`);
-        return;
+        return null;
     }
 
     setAvailableSeats(busId, seats - 1);
     hideSearchError();
+    return { bus, remaining: seats - 1 };
+}
 
-    if (lastSearch) {
-        lastSearch.trips = lastSearch.trips.map(trip => {
-            if (trip.bus.id !== busId) return trip;
-            return { ...trip, seats: seats - 1 };
-        });
-        renderSearchResults();
+function bookBus(busId) {
+    const result = reserveSeat(busId);
+    refreshSearchSeats();
+    if (lastSearch) renderSearchResults();
+    if (result) {
+        showBookingToast(`Seat reserved on ${result.bus.name}. Remaining seats: ${result.remaining}.`);
+    }
+}
+
+function bookTransfer(firstId, secondId) {
+    const firstBus = busesDatabase.find(b => b.id === firstId);
+    const secondBus = busesDatabase.find(b => b.id === secondId);
+    if (!firstBus || !secondBus) return;
+
+    if (getAvailableSeats(firstBus) <= 0 || getAvailableSeats(secondBus) <= 0) {
+        showSearchError('One of the connecting buses is sold out.');
+        refreshSearchSeats();
+        if (lastSearch) renderSearchResults();
+        return;
     }
 
-    const notice = document.createElement('div');
-    notice.className = 'booking-toast';
-    notice.textContent = `Seat reserved on ${bus.name}. Remaining seats: ${seats - 1}.`;
-    document.body.appendChild(notice);
-    setTimeout(() => notice.remove(), 2800);
+    const first = reserveSeat(firstId);
+    const second = reserveSeat(secondId);
+    refreshSearchSeats();
+    if (lastSearch) renderSearchResults();
+    if (first && second) {
+        showBookingToast(`Seats reserved on ${first.bus.name} and ${second.bus.name}.`);
+    }
 }
 
 document.addEventListener('click', function(event) {
