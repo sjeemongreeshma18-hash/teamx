@@ -6,6 +6,8 @@
 
 **Front-end demo:** open `frontend/index.html` in a browser to try the login and search screens.
 
+**Phase 3 foundations:** `cd web && npm install && npm run dev` (routed placeholders, layout, health check).
+
 
 
 ## Basic Details
@@ -35,8 +37,8 @@ A simple login with roles, autocomplete stop selection and filtered results for 
 ### Technologies/Components Used
 
 **For Software:**
-- Frameworks used: React
-- Tools used: VS Code, Git
+- Frameworks used: Next.js (Phase 3 foundations in `web/`), static HTML/CSS/JS demo in `frontend/`
+- Tools used: VS Code, Git, Vercel
 
 ## Features
 
@@ -57,14 +59,33 @@ Passengers receive relevant alerts and updates based on their selected route and
 ### For Software:
 
 #### Installation
+
+Static passenger/conductor demo (no install):
+
 ```bash
-[Installation commands - e.g., npm install, pip install -r requirements.txt]
+# Open frontend/index.html in a browser
 ```
 
-#### Run
+Phase 3 Next.js foundations:
+
 ```bash
-[Run commands - e.g., npm start, python app.py]
+cd web
+npm install
+copy .env.example .env.local
 ```
+
+On macOS/Linux use `cp .env.example .env.local` instead of `copy`.
+
+#### Run
+
+```bash
+cd web
+npm run dev
+```
+
+Then open http://localhost:3000 for placeholder routes (`/`, `/passenger`, `/conductor`, `/health`).
+
+**Vercel:** keep the existing project pointed at `frontend/` so https://teamx-ridesync.vercel.app/ stays the working demo. Create a second Vercel project for this repo with **Root Directory** `web` so pull requests get Next.js Preview deployments. Add the keys from `web/.env.example` to that project for Production and Preview.
 
 ## Project Documentation
 
