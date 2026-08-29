@@ -397,6 +397,13 @@ function interpolateTime(start, end, ratio) {
     return minutesToTime(startMin + (endMin - startMin) * ratio);
 }
 
+function segmentFare(bus, fromIndex, toIndex) {
+    const lastIndex = busRoute(bus).length - 1;
+    const hops = toIndex - fromIndex;
+    if (lastIndex <= 0 || hops <= 0) return Math.max(1, Math.round(bus.price));
+    return Math.max(1, Math.round(bus.price * hops / lastIndex));
+}
+
 function tripForSearch(bus, from, to) {
     const route = busRoute(bus);
     const fromIndex = route.indexOf(from);
@@ -418,7 +425,7 @@ function tripForSearch(bus, from, to) {
         duration: durationMinutes(boardTime, alightTime),
         via,
         seats,
-        fare: bus.price
+        fare: segmentFare(bus, fromIndex, toIndex)
     };
 }
 
@@ -890,6 +897,7 @@ function createTransferCard(itinerary) {
                     <div class="bus-info-value">${escapeHtml(first.bus.name)}</div>
                     <span class="service-badge ${first.bus.type}">${first.bus.type === 'local' ? 'Local' : 'Limited stop'}</span>
                     <div class="bus-info-sub">${first.boardTime} ${formatStopName(first.from)} → ${first.alightTime} ${formatStopName(hub)}</div>
+                    <div class="bus-info-sub">₹${first.fare}</div>
                     <div class="bus-info-sub ${firstSeats.seatsClass}">${firstSeats.seatsLabel}</div>
                 </div>
                 <div class="transfer-leg">
@@ -897,6 +905,7 @@ function createTransferCard(itinerary) {
                     <div class="bus-info-value">${escapeHtml(second.bus.name)}</div>
                     <span class="service-badge ${second.bus.type}">${second.bus.type === 'local' ? 'Local' : 'Limited stop'}</span>
                     <div class="bus-info-sub">${second.boardTime} ${formatStopName(hub)} → ${second.alightTime} ${formatStopName(second.to)}</div>
+                    <div class="bus-info-sub">₹${second.fare}</div>
                     <div class="bus-info-sub ${secondSeats.seatsClass}">${secondSeats.seatsLabel}</div>
                 </div>
             </div>
